@@ -13,13 +13,6 @@ class Bitcoin_LSTM:
         self.X_quantity = None
 
     def get_prepared_data(self, timeseries, today, yesterday):
-        """
-        Returns scaled and shifted for one day values
-
-        :param df: DataFrame with values to be scaled and shifted
-        :return: array of prepared values
-        """
-
         timeseries[["Close-btc", "Close-sp500", "Close-dxy", "Close-gold"]] = self.scl.fit_transform(timeseries[[
             "Close-btc", "Close-sp500", "Close-dxy", "Close-gold"]])
 
@@ -33,14 +26,6 @@ class Bitcoin_LSTM:
         return array
 
     def get_pred_train(self, array,  X_quantity, times):
-        """
-        Returns arrays of predicted and train values
-
-        :param X_quantity: number of days to take in a row before Y
-        :param array: array of DataFrame values
-        :param times: how many predictions to make
-        :return: predict and train arrays
-        """
         self.X_quantity = X_quantity
 
         mod = len(array) % self.X_quantity
@@ -61,11 +46,6 @@ class Bitcoin_LSTM:
         return predict, train
 
     def get_X_values(self, values):
-        """
-        Returns featture variables
-        :param values: array of predict/train values
-        :return: numpay.ndarray of sequence of X_quantity days
-        """
         x = []
         ready_X = []
         COUNT = 1
@@ -81,13 +61,6 @@ class Bitcoin_LSTM:
         return ready_X
 
     def get_Y_targets(self, targets):
-        """
-        Returns target variables
-
-        :param targets: array of predict/train targets
-        :return: numpay.ndarray of target values
-
-        """
         ready_Y = []
         for i_ in range(int(len(targets) / self.X_quantity)):
             i_ += 1
@@ -97,14 +70,6 @@ class Bitcoin_LSTM:
         return ready_Y
 
     def get_array(self, g):
-        """
-        Gets an array of type (None, 1), shapes it into the shape (None, 4), scales it
-        and returns only predicted bitcoin values
-
-        :param g: array of shape (None, 1)
-        :return: array of shape (None, 4)
-
-        """
         g = np.insert(g, [1], .4, axis=1)
         g = np.insert(g, [2], .4, axis=1)
         g = np.insert(g, [3], .4, axis=1)
@@ -117,15 +82,6 @@ class Bitcoin_LSTM:
         return array_ready
 
     def get_forecast(self, timeseries, pred, btc):
-        """
-        Retrieves timestamp of each prediction and concatenating it with prediction values.
-
-        :param timeseries: DataFrame, which supplies us with timestamps
-        :param pred: array of predicted values
-        :return: Forecast DataFrame
-
-        """
-
         t = timeseries.reset_index()
         timestamp = pd.DataFrame()
         timestamp['data'] = t['index'].copy()
@@ -144,12 +100,6 @@ class Bitcoin_LSTM:
                 DAY = DAY + 3
                 ds.append(timestamp.iloc[DAY][0].strftime('%Y-%m-%d'))
                 y_actual.append(btc.iloc[DAY])
-
-        # for d in range(2, 10):
-        #     day = date.today() + timedelta(days=d)
-        #     day = day.strftime('%Y-%m-%d')
-        #     ds.append(day)
-        #     y_actual.append(0)
 
         d = {"ds": ds, "yhat": pred, 'y_actual': y_actual}
         forecast = pd.DataFrame(d)

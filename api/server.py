@@ -97,7 +97,7 @@ def lstm():
         return jsonify(message='Post message')
     elif request.method == 'GET':
         data = plots.lstm_df
-        data['ds'] = data['ds'].astype(str)
+        data['ds'] = data['ds']
         data = {'ds': data['ds'].tolist(),
                 'yhat': data['yhat'].tolist(),
                 'y_actual': data['y_actual'].tolist(),
