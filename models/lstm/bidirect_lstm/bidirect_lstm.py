@@ -18,10 +18,9 @@ class Bidirect_LSTM:
         close_price = df.Close.values.reshape(-1, 1)
         scaled_close = self.scl.fit_transform(close_price)
 
-        # length of the sequence that predicts the next day's value
         self.SEQ_LEN = SEQ_LEN
 
-        # initializing numpday.ndarrays of the whole target and feature arrays
+        # whole target & features
         self.whole_data = np.empty([1, 20, 1])
         self.whole_targets = np.empty([1, 1])
 
