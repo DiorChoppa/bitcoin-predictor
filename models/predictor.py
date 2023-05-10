@@ -16,8 +16,8 @@ class Predictor(object):
         super().__init__()
         self.pred_dict = {
             "model": 0,
-            "start_date": '2021-01-16',
-            "end_date": '2022-01-16'
+            "start_date": '2022-01-16',
+            "end_date": '2023-01-16'
         }
 
         self.lstm_param = {
@@ -32,8 +32,6 @@ class Predictor(object):
         }
 
     def get_prediction_prophet(self):
-        """Predicts future price of bitcoin using prophet model.
-        """
         df = load_data_prophet(self.pred_dict["start_date"])
         df = df.rename(columns={"Date": "ds", "Close": "y"})
 
@@ -53,24 +51,21 @@ class Predictor(object):
         return forecast
 
     def get_prediction_arima(self):
-        """Predicts future price of bitcoin using arima model.
-         """
         # training data
         date1 = pd.to_datetime(self.pred_dict['start_date'])
         date2 = pd.to_datetime(self.pred_dict['end_date'])
 
-        # loading data
+        # load data
         df = load_data_arima(start_date=date1, end_date=date2)
 
         # Model
         mod = SARIMAX(df, order=(0, 1, 1), seasonal_order=(1, 1, 1, 12))
         res = mod.fit(disp=-1)
 
-        # Getting the forecast of future values
+        # Forecast
         date_pr1 = date1 + timedelta(days=1)
         date_pr2 = date2 + timedelta(days=10)
-        a_forecast = res.get_prediction(
-            start=date_pr1, end=date_pr2)  # prediction for  +10 days
+        a_forecast = res.get_prediction(start=date_pr1, end=date_pr2)
 
         pred_ci = a_forecast.conf_int()
         lower = np.array(pred_ci['lower Close'])
@@ -96,8 +91,6 @@ class Predictor(object):
         return forecast
 
     def get_prediction_bidirectlstm(self):
-        """Predicts future price of bitcoin using bidirectional model
-         """
         today = datetime.today().strftime('%Y-%m-%d')
         yesterday = date.today() - timedelta(days=1)
         yesterday = yesterday.strftime('%Y-%m-%d')
@@ -115,22 +108,19 @@ class Predictor(object):
         pred_array = bidirect_lstm.get_prediction_array(whole_data)
         targ_array = bidirect_lstm.get_prediction_array(whole_targets)
 
-        # Loading Model
         file_name = 'models/lstm/bidirect_lstm/BidirectLSTM_BTC-1f.h5'
         model = load_model(file_name)
 
         # Predicting
         y_hat = model.predict(pred_array)
 
-        # Receiving forecast of data
-        # stamp, actual and predicted values
         forecast = bidirect_lstm.get_forecast(
             y_hat, targ_array, num_data_points, df)
 
         rmse = mean_squared_error(
             forecast['y_actual'][:-1], forecast['yhat'][:-1], squared=False)
 
-        # Counting upper/lower values
+        # upper/lower values
         upper = [forecast['yhat'][i] + rmse for i in range(len(y_hat))]
         lower = [forecast['yhat'][i] - rmse for i in range(len(y_hat))]
         forecast['yhat_lower'] = lower

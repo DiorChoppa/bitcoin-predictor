@@ -6,18 +6,6 @@ import yfinance as yf
 
 
 def load_currency(currency, start_date, end_date, path):
-    """Load currency using yahoo finance api.
-
-    Args:
-        currency (str): currency to download.
-        start_date (str): start date.
-        end_date (str): end date.
-        path (str): where to save in .csv format.
-
-    Returns:
-        df: DataFrame
-
-    """
     df = yf.download(currency,
                      start=start_date,
                      end=end_date,
@@ -44,15 +32,6 @@ def load_currency(currency, start_date, end_date, path):
 
 
 def prepare_data(path='data/BTC-USD.csv', start_date='2017-01-01'):
-    """Loads .csv file and prepares data for future use.
-
-    Args:
-        path (str): path to .csv file
-
-    Returns:
-        df: preprocessed DataFrame
-
-    """
     df = pd.read_csv('data/BTC-USD.csv')
     df['Date'] = pd.to_datetime(df.Date, format='%Y-%m-%d')
     df['Diff'] = np.diff(df['Close'], prepend=[0])
@@ -64,12 +43,6 @@ def prepare_data(path='data/BTC-USD.csv', start_date='2017-01-01'):
 
 
 def prepare_dummy_data():
-    """Prepares dummy data for model tabs
-
-    Returns:
-        ds: dummy data dict
-
-    """
     data = prepare_data()
 
     ds = {
@@ -84,17 +57,6 @@ def prepare_dummy_data():
 
 
 def seasonal_decompose(df):
-    """Seasonal decomposition using moving averages.
-
-    Args:
-        df (DataFrame): Pandas df for decomposition.
-
-    Returns:
-        seasonal: The seasonal component of the data series.
-        resid: The residual component of the data series.
-        trend: The trend component of the data series.
-
-    """
     # Resampling to monthly frequency
     df.index = df.Date
     df_month = df.resample('M').mean()
@@ -114,15 +76,6 @@ def seasonal_decompose(df):
 
 
 def load_data_arima(start_date='2018-01-01', end_date='2023-02-12'):
-    """Loads .csv file and prepares data for future use.
-
-    Args:
-        path (str): path to .csv file
-
-    Returns:
-        df: preprocessed DataFrame
-
-    """
     # loading data
     try:
         df = pd.read_csv('data/BTC-USD.csv')
@@ -134,7 +87,6 @@ def load_data_arima(start_date='2018-01-01', end_date='2023-02-12'):
     df['Date'] = pd.to_datetime(df.Date, format='%Y-%m-%d').dt.date
     df.to_csv('check.csv')
 
-    # # Producing and visualizing forecast
     cols = ['Open', 'Low', 'High', 'Volume', 'Adj Close']
     df.drop(cols, axis=1, inplace=True)
 
@@ -149,15 +101,6 @@ def load_data_arima(start_date='2018-01-01', end_date='2023-02-12'):
     return df
 
 def load_data_prophet(path='data/BTC-USD.csv', start_date='2017-01-01'):
-    """Loads .csv file and prepares data for future use.
-
-    Args:
-        path (str): path to .csv file
-
-    Returns:
-        df: preprocessed DataFrame
-
-    """
     df = pd.read_csv('data/BTC-USD.csv')
     df['Date'] = pd.to_datetime(df.Date, format='%Y-%m-%d').dt.date
     df['Diff'] = np.diff(df['Close'], prepend=[0])
@@ -170,18 +113,6 @@ def load_data_prophet(path='data/BTC-USD.csv', start_date='2017-01-01'):
 
 
 def load_df_bidirectlstm(name, start_date):
-    """Loads DataFrames of given values.
-    E.x.: Bitcoin, using yahoo finance api.
-    Takes out one Closed value and fills possible
-    empty values with the nearest value available in the time series
-
-    :param name: value to be downloaded
-    :param start_date: start date
-
-    :return: DataFrame of loaded currency
-
-    """
-
     df = yf.download(name, start=start_date)
     df = df.reset_index()
 
@@ -189,13 +120,6 @@ def load_df_bidirectlstm(name, start_date):
 
 
 def data_update():
-    """Loads data from yahoo!finance and save as *.csv file
-
-    Args:
-        :param start_date: 2017-01-01
-        :param end_date: today
-
-    """
     end_date = datetime.today()
     data_df = yf.download('BTC-USD',
                           start='2017-01-01',
